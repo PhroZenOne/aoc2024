@@ -31,8 +31,42 @@ pub fn main() !void {
     std.mem.sort(u32, rightArr.items, {}, comptime std.sort.asc(u32));
     std.mem.sort(u32, leftArr.items, {}, comptime std.sort.asc(u32));
     var sum: u32 = 0;
-    for (rightArr.items, leftArr.items) |right, left| {
-        sum += @abs(@as(i32, @intCast(left)) - @as(i32, @intCast(right)));
+
+    var previousLeft: u32 = 0;
+    var previousRight: u32 = 0;
+    var rightIndex: usize = 0;
+    for (leftArr.items) |left| {
+        if (left == previousLeft) {
+            sum += previousRight;
+            continue;
+        }
+        if (rightIndex == rightArr.items.len) {
+            break;
+        }
+        var right = rightArr.items[rightIndex];
+
+        while (right != left and right < left) {
+            rightIndex += 1;
+            if (rightIndex == rightArr.items.len) {
+                break;
+            }
+            right = rightArr.items[rightIndex];
+        }
+
+        var rightRows: u32 = 0;
+
+        while (right == left) {
+            rightRows += 1;
+            rightIndex += 1;
+            if (rightIndex == rightArr.items.len) {
+                break;
+            }
+            right = rightArr.items[rightIndex];
+        }
+
+        sum += left * rightRows;
+        previousRight = left * rightRows;
+        previousLeft = left;
     }
     std.debug.print("{d}\n", .{sum});
 }
