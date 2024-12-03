@@ -3,21 +3,36 @@ const std = @import("std");
 pub fn main() !void {
     std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
 
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+    var file = try std.fs.cwd().openFile("./1/input", .{});
+    defer file.close();
 
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
+    var buf_reader = std.io.bufferedReader(file.reader());
+    var in_stream = buf_reader.reader();
 
-    try bw.flush(); // don't forget to flush!
-}
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    const allocator = gpa.allocator();
+    defer _ = gpa.deinit();
 
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
+    var rightArr = std.ArrayList(u32).init(allocator);
+    var leftArr = std.ArrayList(u32).init(allocator);
+
+    defer rightArr.deinit();
+    defer leftArr.deinit();
+
+    var buf: [1024]u8 = undefined;
+    while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
+        var it = std.mem.split(u8, line, "   ");
+        const leftStr = it.next().?;
+        const rightStr = it.next().?;
+        try leftArr.append(try std.fmt.parseInt(u32, leftStr, 10));
+        try rightArr.append(try std.fmt.parseInt(u32, rightStr, 10));
+    }
+
+    std.mem.sort(u32, rightArr.items, {}, comptime std.sort.asc(u32));
+    std.mem.sort(u32, leftArr.items, {}, comptime std.sort.asc(u32));
+    var sum: u32 = 0;
+    for (rightArr.items, leftArr.items) |right, left| {
+        sum += @abs(@as(i32, @intCast(left)) - @as(i32, @intCast(right)));
+    }
+    std.debug.print("{d}\n", .{sum});
 }
