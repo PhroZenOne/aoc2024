@@ -23,31 +23,16 @@ pub fn main() !void {
     }
     var sum: u32 = 0;
     for (matrix.items, 0..) |char, index| {
-        if (char != 'X') {
+        if (char != 'A') {
             continue;
         }
-        if (at(index, 1, 0) == 'M' and at(index, 2, 0) == 'A' and at(index, 3, 0) == 'S') {
-            sum += 1;
-        }
-        if (at(index, 1, -1) == 'M' and at(index, 2, -2) == 'A' and at(index, 3, -3) == 'S') {
-            sum += 1;
-        }
-        if (at(index, 0, -1) == 'M' and at(index, 0, -2) == 'A' and at(index, 0, -3) == 'S') {
-            sum += 1;
-        }
-        if (at(index, -1, -1) == 'M' and at(index, -2, -2) == 'A' and at(index, -3, -3) == 'S') {
-            sum += 1;
-        }
-        if (at(index, -1, 0) == 'M' and at(index, -2, 0) == 'A' and at(index, -3, 0) == 'S') {
-            sum += 1;
-        }
-        if (at(index, -1, 1) == 'M' and at(index, -2, 2) == 'A' and at(index, -3, 3) == 'S') {
-            sum += 1;
-        }
-        if (at(index, 0, 1) == 'M' and at(index, 0, 2) == 'A' and at(index, 0, 3) == 'S') {
-            sum += 1;
-        }
-        if (at(index, 1, 1) == 'M' and at(index, 2, 2) == 'A' and at(index, 3, 3) == 'S') {
+        const one = at(index, -1, 1);
+        const two = at(index, 1, 1);
+        const three = at(index, 1, -1);
+        const four = at(index, -1, -1);
+        if (((one == 'M' and three == 'S') or (one == 'S' and three == 'M')) and
+            ((two == 'M' and four == 'S') or (two == 'S' and four == 'M')))
+        {
             sum += 1;
         }
     }
